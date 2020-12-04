@@ -216,6 +216,13 @@ Currently, you can look at the last time for the previous interval. The value is
 
 or `yourobject.interval = (somesecs1, somesecs2, ...)`
 
+or `x = yourobject.interval`
+
+You can read the current interval. You will _always_ get a tuple back:
+
+    every_sec = Every(1)
+    print(every_sec.interval) # prints a tuple: (1,)
+
 You can change the interval/pattern at any time, so you can dynamical change your timing (e.g. blink interval is proportional to the potentiometer).
 
 You can update to a single period, a pattern of repeating intervals, a one-shot, or a sequence of non-repeating intervals, just like the Constructor.
@@ -253,6 +260,16 @@ Also useful to synchronize the period/interval to a start time. `Every` objects 
 
     if led_duration(): # won't start running till .start
         cp.red_led = False
+
+### 8. `yourobject.running` # is it running?
+
+Currently exposed, setting this is not supported.
+
+Only relevant for duration/non-repeating/timer objects, you can test if `.start` has been called _and_ the last interval hasn't expired.
+
+    if not sound_duration.running:
+        # it's not running, we could restart it, or play another sound, etc
+
 
 #### Longer example
 
