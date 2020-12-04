@@ -64,7 +64,8 @@ To do several things periodically, you want a non-blocking solution.
 
 It's common to pair a periodic action with a duration (timer), like "every minute, make an obnoxious beep noise". The beep-noise has a duration. You'll want a non-blocking duration (timer) for that. Patterns of intervals and non-repeating patterns of intervals are also useful.
 
-This is the classic pattern, that blocks your code:
+This is the classic, explicit, solution, that doesn't block your code:
+
     interval = 0.5 # some seconds
     last_time = time.monotonic()
 
@@ -73,11 +74,13 @@ This is the classic pattern, that blocks your code:
             last_time = time.monotonic()
             ...do something...
 
+I've turned that into a pattern via a class.
+
 (this is based on a c++ version I've written for Arduino)
 
 ## Prerequisites
 
-This was written for python-3, and the standard libraries. It is specifically targetted to Adafruit's [circuitpython](https://circuitpython.org/) (a derivative of micropython).
+This was written for python 3, and the standard libraries. It is specifically targetted to Adafruit's [circuitpython](https://circuitpython.org/) (a derivative of micropython).
 
 ## Installation
 
@@ -109,7 +112,7 @@ I found the name "Every" to read well, but if that collides with some other thin
 The objects need to be global since they keep track of time. Of course, expert programmers can figure out other patterns as long as the object persists for dynamic/temporal scope as needed (e.g. maybe construct it dynamically, and push to a global list).
 
 #### Every(seconds) # Repeating interval
-This creates an object that will "fire" _at_ every interval, e.g. "every 0.5 seconds, 'fire'".
+This creates an object that will "fire" _at_ every interval, e.g. "every 0.5 seconds, 'do something'".
 
     from every import Every
 
@@ -150,7 +153,7 @@ This creates an object that will fire for each interval, but does not repeat: "d
 
 Again, **name** the object so that it reads well with the `if ...` pattern you'll use below: "if in-some-duration():..."
 
-### 3. Expired predicate: `yourobject()`
+### 3. `yourobject()` # Expired predicate: 
 
 In other words, "is it time?", "has the interval happened?", "every N, do...".
 
@@ -176,8 +179,6 @@ This will return true only once for the interval, so if you were somehow delayed
 
 Especially relevant for timer/one-shot objects, the interval starts from when you construct the object. See below for resetting the start time.
 
-**Drift** The code makes a decent attempt to avoid drift. So, in the cases above, where it can't "fire" exactly on 0.1 intervals, it will still try to fire on the next multiple of the 0.1 interval.
-
 A typical pattern would be:
 
     if yourobject():
@@ -190,7 +191,9 @@ In the body of the `if`:
 * `sleep()` will still stop the whole program
 * long'ish operations may make other Every objects late, or cause one to skip
 
-#### 4. Pattern state (index) `yourbobject.i`
+**Drift** The code makes a decent attempt to avoid drift. So, in the cases above, where it can't "fire" exactly on 0.1 intervals, it will still try to fire on the next multiple of the 0.1 interval.
+
+#### 4. `yourbobject.i` # Pattern state (index) 
 
 The object knows which step of the pattern it is on, and you can use that instead of another variable to decide on the action.
 
@@ -205,11 +208,11 @@ The first time `yourobject()` is true, `.i` will be 1.
 
 Before the first true, `.i` should be 0. And, after the last interval in a non-repeating pattern, it should be 0.
 
-#### 5. The last time it fired `yourobject.last`
+#### 5. `yourobject.last` # The last time it fired 
 
 Currently, you can look at the last time for the previous interval. The value is a `time.monotonic()`.
 
-#### 6. Update the interval/patterns `yourobject.interval = newvalue`
+#### 6. `yourobject.interval = newvalue` # Update the interval/patterns 
 
 or `yourobject.interval = (somesecs1, somesecs2, ...)`
 
@@ -228,7 +231,7 @@ You can update to a single period, a pattern of repeating intervals, a one-shot,
     elif someotherreason
         blink_interval.interval = (1, 0.5) # a pattern!
 
-#### 7. Start/restart `yourobject.start()`
+#### 7. `yourobject.start()` # Start/restart 
 
 Remember, a duration/non-repeating/timer object (has the trailing `0` in its pattern), starts out as non-running: it's false till you `.start` it and it's interval(s) expire.
 
@@ -306,7 +309,7 @@ This is not the only solution, of course.
 
 Advantages: 
 
-* the simplist pattern I could think of for the basic periodic action, so easier for beginners
+* the simplist pattern I could think of for the basic periodic action, so, easier for beginners
 * still allows periodic, patterns, and non-repeating durations
 * reads well if you name the Every instance well
 * conscious of code/variable footprint relevant for circuit/micro-python RAM limits
@@ -334,3 +337,4 @@ Disadvantages:
 
 * a lightweight version that takes less code-space/variable-space memory.
 * the `.mpy` compiled versions
+* cleanup docstrings to be python'ish
