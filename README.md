@@ -23,7 +23,7 @@ While written especially for micropython and circuitpython, this library works i
 
 ## Background
 
-`time.sleep()` stops your code, so you can only do 1 thing at a time. Here's the typical blink:
+`time.sleep()` stops your code, so you can only do 1 thing at a time. Here's the familiar blocking-style blink:
 
     import sleep from time
 
@@ -41,7 +41,7 @@ The entire body of the `while` is affected by the `sleep()`. So, you can't blink
 
     while(1):
 
-        # this loop doesn't work 
+        # this loop doesn't do what you hope 
         # because it stops completely at each sleep()
 
         # blink builtin neopixel "0"
@@ -62,9 +62,9 @@ Similarly, if you wanted to read a sensor, update a servo, read another sensor, 
 
 To do several things periodically, you want a non-blocking solution.
 
-It's common to pair a periodic action with a duration (timer), like "every minute, make an obnoxious beep noise". The beep-noise has a duration. You'll want a non-blocking duration (timer) for that. Patterns of intervals and non-repeating patterns of intervals are also useful.
+It's common to pair a periodic action with a duration (timer), like "every minute, make an obnoxious beep noise". The beep-noise has a duration. You'll want a non-blocking duration (timer) for that, too. Patterns of intervals and non-repeating patterns of intervals are also useful.
 
-This is the classic, explicit, solution, that doesn't block your code:
+This is the classic solution, that doesn't block your code:
 
     interval = 0.5 # some seconds
     last_time = time.monotonic()
@@ -74,13 +74,13 @@ This is the classic, explicit, solution, that doesn't block your code:
             last_time = time.monotonic()
             ...do something...
 
-I've turned that into a pattern via a class.
+I've turned that into a pattern via a class, with more flexibility.
 
 (this is based on a c++ version I've written for Arduino)
 
 ## Prerequisites
 
-This was written for python 3, and the standard libraries. It is specifically targetted to Adafruit's [circuitpython](https://circuitpython.org/) (a derivative of micropython).
+This was written for python 3, and the standard libraries. It is specifically targetted to Adafruit's [circuitpython](https://circuitpython.org/) (a derivative of micropython). It does not have any extra prerequisites.
 
 ## Installation
 
@@ -94,6 +94,8 @@ For circuit/micro-python devices:
 * copy the `every` folder to your `CIRCUITPYTHON`
 * write code that uses it
 
+For the smaller-memory-footprint version, the instructions are the same except use the `every-mpy-lightweight-*.zip`
+
 For regular python:
 
 * go to [Latest release](https://github.com/awgrover/every-py/releases/latest)
@@ -104,6 +106,8 @@ For regular python:
 * or otherwise put the unzipped directory in the python search path
 
 ## Usage
+
+(see also, "Lightweight Usage" below)
 
 ### 1. Import
 
@@ -329,6 +333,59 @@ This example uses the built-in LED, and neo-pixels:
 
         # `if beeping()...` would have a similar pattern
 
+## Lightweight Usage
+
+It is not difficult to consume all available memory on a circuitplayground express, or other circuit/micro-python device. Supposedly, around 200 lines of python will do it on the circuitplayground express!
+
+Using the .mpy files can help, as this avoids byte-code compilation on the device. See Installation above.
+
+But, I've provided simplified versions of `Every`, for repeating periods; and a separate `Timer` class for one-shot durations. They don't support patterns, and are separate classes. They are significantly smaller ("significant" if you are at the point where you are worrying about it), and somewhat faster. Again, use the .mpy files, specifically see the `Releases` (as noted in "Installation" above) that have only the lightweight versions.
+
+* If you only import one class from `every.lightweight`, it uses much less memory.
+* If you import both `Every` and `Timer`, it doesn't save as much memory (especially byte-code), though each object you make is smaller than the full-function `Every`, and is somewhat faster. You should consider just using the full-function `Every`.
+* I don't think special versions that can do patterns would end up being smaller enough to make it worthwhile. If you want patterns of intervals, just use the full-function `Every`
+
+### Lightweight `Every`
+
+The lightweight `Every` works much as above, except no patterns, and it _only_ does repeating periodic (see `Timer` below):
+
+    from every.lightweight import Every
+
+    # globals
+    every_second = Every(1.0)
+
+    while(1):
+        if every_second():
+            ....
+
+* The constructor `Every(...)` takes exactly 1 argument: the number of seconds.
+* You can't specify a pattern of intervals.
+* It always repeats (see `Timer`, next)
+* You can assign to `yourobject.interval` to update it, but only a single value.
+* You can read from `yourobject.interval`, but it is always a single value (not tuple).
+* You can use `yourobject.start()` to synchronize, and read `yourobject.last`
+* There is no `yourobject.i` (there are no patterns)
+
+### Lightweight `Timer`
+
+The separate lightweight `Timer` works much as the regular `Every` for non-repeating/timer, except no patterns.
+
+    from every.lightweight import Timer
+
+    # globals
+    has_been_one_second = Timer(1.0)
+
+    while(1):
+        if somethinginterestinghappens:
+            ... start something ...
+            has_been_one_second.start()
+
+        if has_been_one_second():
+            ....
+
+* All the notes for lightweight `Every` apply
+* It does have `yourobject.running`
+
 ## References
 
 This is not the only solution, of course. 
@@ -340,17 +397,18 @@ Advantages:
 * reads well if you name the Every instance well
 * conscious of code/variable footprint relevant for circuit/micro-python RAM limits
 * works without the `threading` module
+* lightweight options available
 
 Disadvantages:
 
 * not efficient for a large number of `Every` objects (perhaps 10 is the breakpoint)
-* not minimal for _only_ the basic periodic action (but see the lightweight version soon to be released)
+* not minimal for _only_ the basic periodic action (but see the lightweight versions)
 * the `if someperiod():...` pattern is a less common pattern in the python world
 * a bit awkward for getting the index of the pattern
 * does not support lambdas (nor function references), because the `if ...` pattern seemed good enough, and kept the memory size down
 * unlike c++, you pay for features/behavior that you don't use (thus the lightweight versions)
 * to do "repeat N times", you have to provide N intervals in the constructor, or do your own counter+reset
-* doesn't use the `threading` module, nor async mechanisms
+* doesn't use the `threading` module, nor the (new) `async` mechanism
 
 **other libs**
 
@@ -359,8 +417,30 @@ Disadvantages:
 * http://docs.python.org/2.7/library/threading.html#module-threading
 * http://bleaklow.com/2010/07/20/a\_very\_simple\_arduino\_task\_manager.html
 
+## Development/Building
+
+No building is required for the .py files. But, the .mpy files have to be "compiled" by `cross-mpy`. And, the release artefacts (mpy zip files) have to be built.
+
+### Building Prerequisites
+
+* git
+* get, install as mpy-cross, and add to PATH: `mpy-cross` command from [https://pypi.org/project/mpy-cross](https://pypi.org/project/mpy-cross)
+* The Makefile requires `gnu-make`
+
+### Building
+
+* update `every/version.py`, incrementing the `__version__` as appropriate
+* commit changed files
+* create a git tag if the `__version__` has changed
+* run
+
+    make
+
+* It will check that the git-tag and version.py match, and will make the .zip files
+* push and create a "Release" in gihub based on the tag, attach the new .zip files that were made
+
 ## TODO
 
-* a lightweight version that takes less code-space/variable-space memory.
-* the `.mpy` compiled versions
 * cleanup docstrings to be python'ish
+* add tests
+* "publish" to pip-like and adafruit community
