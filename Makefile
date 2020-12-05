@@ -5,11 +5,20 @@ all_mpy = $(shell git ls-files | egrep '\.py$$' | sed 's/\.py$$/.mpy/')
 all_dirs = $(shell git ls-files | xargs dirname | sort -u)
 version = $(shell python3 -c 'import every.version; print( every.version.__version__)')
 
-every-mpy-$(version).zip : $(all_mpy) $(all_dirs) | git-tag
+every-mpy-$(version).zip : $(all_mpy) $(all_dirs) | git-tag-up-to-date
 	echo "MAKE " $(all_mpy)
 	# [ -e $@ ] && rm $@
 	rm $@ 2>/dev/null || true
 	zip $@ $(all_mpy)
+
+.PHONY : minor-release
+minor-release : 
+	@# increment version and tag and make
+	python3 -c 'import every.version; vparts = every.version.__version__.split("."); print("#v",vparts); vparts[-1] = str(int(vparts[-1])+1); print("__version__ = \"%s\"" % ".".join(vparts))' > .x
+	cat .x > every/version.py; rm .x
+	git commit -a -m 'increment minor version'
+	git tag v`python3 -c 'import every.version; print( every.version.__version__)'`
+	$(MAKE)
 
 %.mpy : %.py | mpy-cross
 	mpy-cross $< -o $@
@@ -22,8 +31,8 @@ mpy-cross :
 		exit 1; \
 	fi
 
-.PHONY : git-tag
-git-tag :
+.PHONY : git-tag-up-to-date
+git-tag-up-to-date :
 	@# Check version==git-tag==head
 	@if ! git diff-index --quiet HEAD; then \
 		git status; \
@@ -34,7 +43,7 @@ git-tag :
 		echo "No git-tag matching version.py: v$(version). # git tag v$(version)"; \
 		exit 1; \
 	fi
-	@if test `git show-ref -s --tags v1.0` != `git show-ref --head --heads -s HEAD`; then \
+	@if test `set -x; git show-ref -s --tags v$(version)` != `git show-ref --head --heads -s HEAD`; then \
 		echo "HEAD != tag v$(version). update version.py"; \
 		exit 1; \
 	fi
