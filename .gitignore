@@ -1,2 +1,3 @@
+__pycache__
 *.mpy
-/every-mpy.zip
+/every-mpy-*.zip
