@@ -86,13 +86,22 @@ This was written for python 3, and the standard libraries. It is specifically ta
 
 I haven't dealt with the standard python systems like pip, or the community library for circuitpython, etc. yet.
 
-For circuitpython devices:
+For circuit/micro-python devices:
 
-* go to [https://github.com/awgrover/every-py](https://github.com/awgrover/every-py)
-* Use the **Code** button, and chose **Download ZIP**
+* go to [Latest release](https://github.com/awgrover/every-py/releases/latest)
+* download the `every-mpy-*.zip` (or the "Source code" zip for regular .py files)
 * unzip it to somewhere that you can remember
 * copy the `every` folder to your `CIRCUITPYTHON`
 * write code that uses it
+
+For regular python:
+
+* go to [Latest release](https://github.com/awgrover/every-py/releases/latest)
+* download the "Source code" zip file
+* unzip it to somewhere that you can remember
+* before the import, do this
+`import sys; sys.path.append('somewhere that you can remember')`
+* or otherwise put the unzipped directory in the python search path
 
 ## Usage
 
