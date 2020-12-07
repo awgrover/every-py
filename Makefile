@@ -60,7 +60,7 @@ git-tag-up-to-date :
 
 .PHONY : test
 test :
-	echo Run tests
+	python3 -m unittest tests.every_tests
 	
 
 # OMG
