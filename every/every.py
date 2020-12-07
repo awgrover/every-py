@@ -90,10 +90,11 @@ class Every(object):
         this_interval = self.interval[self.i]
         if (self.running and this_interval != 0 and diff >= this_interval):
             self.last = now
+            last_interval = self.interval[self.i]
             self.i = (self.i + 1) % len(self.interval)
             next_interval = self.interval[self.i]
             if next_interval != 0:
-                drift = diff % next_interval
+                drift = diff % last_interval
                 self.last -= drift
             return True
         else:
