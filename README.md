@@ -231,12 +231,12 @@ or `yourobject.interval = (somesecs1, somesecs2, ...)`
 
 or `x = yourobject.interval`
 
+You can change the interval/pattern at any time, so you can dynamical change your timing (e.g. blink interval is proportional to the potentiometer). Note: setting the interval acts a lot like the constructor: a periodic object will fire immediately (call .start() if you want the first interval).
+
 You can read the current interval. You will _always_ get a tuple back:
 
     every_sec = Every(1)
     print(every_sec.interval) # prints a tuple: (1,)
-
-You can change the interval/pattern at any time, so you can dynamical change your timing (e.g. blink interval is proportional to the potentiometer).
 
 You can update to a single period, a pattern of repeating intervals, a one-shot, or a sequence of non-repeating intervals, just like the Constructor.
 
