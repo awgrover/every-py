@@ -7,7 +7,7 @@ While written especially for micropython and circuitpython, this library works i
 ## Summary
 
     from adafruit_circuitplayground import cp
-    from every import Every
+    from every.every import Every
 
     every_half_second = Every(0.5) # every 0.5 seconds
 
@@ -113,12 +113,12 @@ For regular python:
 
 Most conveniently, you typically want to import the "class":
 
-    from every import Every
+    from every.every import Every
 
 I found the name "Every" to read well, but if that collides with some other thing, or doesn't read well to you, you can do the "alias" thing:
 
     # of course, the examples below won't match anymore
-    from every import Every as EveryPeriod # make up your own name
+    from every.every import Every as EveryPeriod # make up your own name
 
 ### 2. Construct global objects
 
@@ -127,7 +127,7 @@ The objects need to be global since they keep track of time. Of course, expert p
 #### Every(seconds) # Repeating interval
 This creates an object that will "fire" _at_ every interval, e.g. "every 0.5 seconds, 'do something'".
 
-    from every import Every
+    from every.every import Every
 
     # globals
     blink_interval = Every(0.5)
@@ -139,7 +139,7 @@ Note that this example as a blink-interval is actually half the blink-interval (
 #### Every(seconds1, seconds2, ...) # Repeating pattern of intervals
 This creates an object that has a sequence of intervals, then it repeats the sequence.
 
-    from every import Every
+    from every.every import Every
 
     # globals
     long_short_blink = Every(0.5, 0.1)
@@ -151,7 +151,7 @@ And, `fancy_blink_interval` will fire at 0.5 seconds, then 0.1, then 0.1, then 0
 #### Every(seconds, 0) # a duration/timer, non-repeating
 This creates an object that will fire only **once**, after `seconds`. So, it is used as a timer. Note the **0**, that is the signal that this is a timer (one-shot). You have to call `.start()` to start this. It is resettable.
 
-    from every import Every
+    from every.every import Every
 
     # globals
     sound_duration = Every(2, 0)
@@ -159,7 +159,7 @@ This creates an object that will fire only **once**, after `seconds`. So, it is 
 #### Every(seconds1, seconds2, ..., 0) # a one-shot sequence of intervals
 This creates an object that will fire for each interval, but does not repeat: "do this sequence once". So, still like a timer, but with a pattern before it stops firing. It is resettable.
 
-    from every import Every
+    from every.every import Every
 
     # globals
     beeping = Every(1, 0.5, 1, 0.5, 0)
@@ -172,7 +172,7 @@ In other words, "is it time?", "has the interval happened?", "every N, do...".
 
 This uses a function-call pattern to test if the interval has expired. For all the object variations from above.
 
-    from every import Every
+    from every.every import Every
 
     # globals
     beeping = Every(1, 0.5, 1, 0.5, 0)
@@ -240,7 +240,7 @@ You can change the interval/pattern at any time, so you can dynamical change you
 
 You can update to a single period, a pattern of repeating intervals, a one-shot, or a sequence of non-repeating intervals, just like the Constructor.
 
-    from every import Every
+    from every.every import Every
 
     # globals
     blink_interval = Every(0.5)
@@ -259,7 +259,7 @@ Typically useful to re-use a duration/non-repeating/timer after it has finished 
 
 Also useful to synchronize the period/interval to a start time. `Every` objects for repeating periods have a start time that is set when they are constructed. Duration/non-repeating "start" when you call `.start()`. But, you could also synchronize a repeating pattern by setting the start (or updating it).
 
-    from every import Every
+    from every.every import Every
 
     # globals
     led_duration = Every(1.0, 0)
@@ -289,7 +289,7 @@ Only relevant for duration/non-repeating/timer objects, you can test if `.start`
 This example uses the built-in LED, and neo-pixels:
 
     from adafruit_circuitplayground import cp
-    from every import Every
+    from every.every import Every
 
     # globals
     blink_interval = Every(0.5)
