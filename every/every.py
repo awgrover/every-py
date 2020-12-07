@@ -72,6 +72,7 @@ class Every(object):
         else:
             raise Exception(".interval must be a number or tuple")
         self.i=0
+        self.last = time.monotonic() - self.interval[self.i] # start immediatly
         # timers (final 0) don't run till .start
         self.running = self.interval[-1] != 0
         return self
