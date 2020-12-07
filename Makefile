@@ -1,4 +1,5 @@
 # to make the .mpy packge for circuitpython
+# and to run tests
 
 # depend on git-controlled files, and their directory to detect dropping a file
 all_mpy = $(shell git ls-files every | egrep '\.py$$' | sed 's/\.py$$/.mpy/') 
@@ -56,3 +57,19 @@ git-tag-up-to-date :
 			exit 1; \
 		fi; \
 	fi
+
+.PHONY : test
+test :
+	echo Run tests
+	
+
+# OMG
+# the plan was, preprocess to a .cpp,
+# https://arduino.github.io/arduino-cli/latest/commands/arduino-cli_compile/
+# compile and run tests in "emulation":
+# https://github.com/bxparks/UnixHostDuino
+# and write tests in aunit
+# https://github.com/bxparks/AUnit
+
+ardtest :
+	arduino-cli compile --preprocess 
