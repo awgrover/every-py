@@ -23,6 +23,8 @@ class PeriodAndDurationTests(unittest.TestCase):
         assert finished - now < 0.005, "But, we can get a lot of work done in 0.05 (actual %s)" % (finished-now)
 
     def testSimpleEvery(self):
+        # does a basic behavior work at all?
+
         tenth = Every(0.1)
         start=time.monotonic()
         finished = None
@@ -39,6 +41,28 @@ class PeriodAndDurationTests(unittest.TestCase):
                 finished = time.monotonic()
 
         assert math.isclose(finished-start, 0.1, rel_tol=0.1, abs_tol=0.0), "Elapsed ~0.1, actually %s" % (finished-start)
+
+    def testNonBlocking(self):
+        # a major claim!
+
+        fifdred = Every(0.05)
+
+        start = time.monotonic()
+        fifdred() # expire immediately 1st time
+
+        # yes, already tested, but if you are debugging, you'll want to know
+        assert math.isclose(time.monotonic()-start, 0.0, rel_tol=0.1, abs_tol=0.001), "1st period is instantly, actually %s" % (finished-start)
+
+        # might as well test till expired
+        ct = 0
+        last = time.monotonic()
+        while not fifdred():
+            ct+=1
+            now = time.monotonic()
+            assert math.isclose(now-last, 0.0, rel_tol=0.1, abs_tol=0.001), "Doesn't block (loop # %s), actually %s" % (ct, now-last)
+            last = time.monotonic()
+        # I got 56,000 loops!
+        assert ct > 1,"Ran a polling loop, i.e., didn't block for %s>1 times" % ct
 
     def testEveries(self):
         # because Every takes time, we are going to test a bunch of things in parallel
@@ -145,7 +169,6 @@ class PeriodAndDurationTests(unittest.TestCase):
             'unchanged' : [],
             'changed' : [],
             }
-
 
         # let the slowest happen twice
         while( time.monotonic() - test_start < 0.24):

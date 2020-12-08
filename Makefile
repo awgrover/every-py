@@ -58,8 +58,9 @@ git-tag-up-to-date :
 		fi; \
 	fi
 
-.PHONY : test
-test :
+.PHONY : test tests
+test tests : $(shell find tests -name '*.py' | egrep '__')
+	# python3 -m unittest tests.every_tests.PeriodAndDurationTests.testSetInterval
 	python3 -m unittest tests.every_tests
 	
 
