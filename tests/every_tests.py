@@ -22,6 +22,25 @@ class PeriodAndDurationTests(unittest.TestCase):
         assert now != finished, "Time actually passes according to monotonic()"
         assert finished - now < 0.005, "But, we can get a lot of work done in 0.05 (actual %s)" % (finished-now)
 
+    def testSimpleTimer(self):
+        # does a basic behavior work
+
+        tenth = Every(0.05, 0)
+        start=time.monotonic()
+
+        assert not tenth(), "Does not fire instantly"
+        assert math.isclose(time.monotonic()-start, 0, rel_tol=0.01, abs_tol=0.001),"First test doesn't block or take time, saw %s != %s " % (time.monotonic()-start)
+
+        start=time.monotonic()
+        tenth.start()
+        finished = None
+        while( not finished and time.monotonic() - start < 1):
+            if tenth():
+                finished = time.monotonic()
+                break
+
+        assert math.isclose(finished-start, 0.05, rel_tol=0.1, abs_tol=0.0), "Elapsed ~0.05, actually %s" % (finished-start)
+
     def testSimpleEvery(self):
         # does a basic behavior work at all?
 
@@ -31,6 +50,7 @@ class PeriodAndDurationTests(unittest.TestCase):
         while( not finished and time.monotonic() - start < 1):
             if tenth():
                 finished = time.monotonic()
+                break
 
         assert math.isclose(finished-start, 0.0, rel_tol=0.1, abs_tol=0.001), "1st period is instantly, actually %s" % (finished-start)
 
@@ -39,6 +59,7 @@ class PeriodAndDurationTests(unittest.TestCase):
         while( not finished and time.monotonic() - start < 1):
             if tenth():
                 finished = time.monotonic()
+                break
 
         assert math.isclose(finished-start, 0.1, rel_tol=0.1, abs_tol=0.0), "Elapsed ~0.1, actually %s" % (finished-start)
 
@@ -56,7 +77,7 @@ class PeriodAndDurationTests(unittest.TestCase):
         # might as well test till expired
         ct = 0
         last = time.monotonic()
-        while not fifdred():
+        while not fifdred() and time.monotonic()-start < 1:
             ct+=1
             now = time.monotonic()
             assert math.isclose(now-last, 0.0, rel_tol=0.1, abs_tol=0.001), "Doesn't block (loop # %s), actually %s" % (ct, now-last)
@@ -94,6 +115,7 @@ class PeriodAndDurationTests(unittest.TestCase):
             an_every.start()
 
         while not done and time.monotonic()-start < 1.0:
+            # will always run 1.0 seconds, because we don't try to test if everybody is finished
             i = 0
             done = True
             elapsed = time.monotonic()
@@ -159,6 +181,7 @@ class PeriodAndDurationTests(unittest.TestCase):
         while( time.monotonic() - test_start < 1):
             if self.start_tester():
                 hit_at = time.monotonic()
+                break
         assert hit_at, "Expected to expire at least once!" # sanity
 
     def testSetInterval(self):

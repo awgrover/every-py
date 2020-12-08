@@ -182,15 +182,24 @@ This uses a function-call pattern to test if the interval has expired. For all t
         if beeping():
             ...it's time, do something...
 
-The result of `yourobject()` is false until the interval, then true exactly once to signal that the interval has passed, and then becomes false again. For objects with multiple intervals (a pattern), it will become true again for the next interval in the pattern. For repeating objects (where the constructor had _no_ final `0`), it will start the pattern overagain. For non-repeating (_with_ a final `0` in the pattern), it will stay false after the last interval (not counting the final 0), see `.start`.
+For repeating/periodic objects:
 
-**Non-repeating** objects will not return true till you `.start` them (see below).
+* The first test of `yourobject()` will be True. I.e. instantly.
+* It will then be false till the first interval has passed
+* Then it will be True again, and so on through the pattern
+* At the end of the pattern, it will repeat
 
-Note that this will return true if the interval has been passed: so you are not gauranteed to get exact timing. Consider the case where you have an `Every(0.1)`: if some code took 0.05 seconds, then you would get true at 0.15.
+For a non-repeating/duration object:
 
-This will return true only once for the interval, so if you were somehow delayed 1 second for an `Every(0.1)`, you'd still only get true once at 1 second (and then every 0.1 as usual).
+* `yourobject()` will be False
+* When you call `yourobject.start()`, the first duration begins
+* `yourobject()` will be False till the duration has passed
+* Then it will be True again, and so on through the pattern
+* After the last duration in the pattern, `yourobject()` will be False until you restart the whole sequence with `.start()`
 
-Especially relevant for timer/one-shot objects, the interval starts from when you construct the object. See below for resetting the start time.
+Note that this will return True if the interval has been passed: so you are not gauranteed to get exact timing. Consider the case where you have an `Every(0.1)`: if some code took 0.2 seconds, then you would get true at 0.2.
+
+This will return true only once for each interval, so an `if...` will fire _at_ each interval, which is the point.
 
 A typical pattern would be:
 
@@ -202,7 +211,7 @@ In the body of the `if`:
 
 * long operations will still stop the whole program (e.g. fetching a web-page)
 * `sleep()` will still stop the whole program
-* long'ish operations may make other Every objects late, or cause one to skip
+* long'ish operations may make other Every objects late
 
 **Drift** The code makes a decent attempt to avoid drift. So, in the cases above, where it can't "fire" exactly on 0.1 intervals, it will still try to fire on the next multiple of the 0.1 interval.
 
