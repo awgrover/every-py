@@ -58,19 +58,14 @@ git-tag-up-to-date :
 		fi; \
 	fi
 
+# just for convenience
 .PHONY : test tests
 test tests : $(shell find tests -name '*.py' | egrep '__')
 	# python3 -m unittest tests.every_tests.PeriodAndDurationTests.testSetInterval
 	python3 -m unittest tests.every_tests
 	
-
-# OMG
-# the plan was, preprocess to a .cpp,
-# https://arduino.github.io/arduino-cli/latest/commands/arduino-cli_compile/
-# compile and run tests in "emulation":
-# https://github.com/bxparks/UnixHostDuino
-# and write tests in aunit
-# https://github.com/bxparks/AUnit
-
-ardtest :
-	arduino-cli compile --preprocess 
+# just for convenience, we don't commit README.html
+.PHONY : doc docs
+doc docs : README.html
+README.html : README.md
+	markdown $^ > $@

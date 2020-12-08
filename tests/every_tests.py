@@ -72,12 +72,15 @@ class PeriodAndDurationTests(unittest.TestCase):
 
         # periodics
         # we cause these to NOT fire instantly ( .start() ), so no 1st 0 duration:
-        everies.append( (Every(0.1), 0.1, 0.1) )
-        everies.append( (Every(0.1, 0.15), 0.1, 0.15) )
+        everies.append( (Every(0.1), 0.1, 0.1, 0.1) ) # also checks that it repeats
+        everies.append( (Every(0.1, 0.15), 0.1, 0.15, 0.1, 0.15, 0.1) ) # also checks that it repeats
         # don't get too long, it takes the total just to run the tests!
-        everies.append( (Every(0.1, 0.15, 0.2, 0.1), 0.1, 0.15, 0.2, 0.1) )
+        everies.append( (Every(0.1, 0.15, 0.2, 0.1), 0.1, 0.15, 0.2, 0.1, 0.1) )
 
-        # durations, put a fake -1, which makes us keep trying for a firing, and which we handle special below
+        # durations, put a fake -1, 
+        # which makes us keep trying for a firing, 
+        # but means it shouldn't actually fire,
+        # and which we handle special below
         everies.append( ( Every(0.1, 0), 0.1, -1 ))
         everies.append( ( Every(0.2, 0.15, 0.1, 0), 0.2, 0.15, 0.1, -1 ))
 
