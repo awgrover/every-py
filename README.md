@@ -197,7 +197,7 @@ For a non-repeating/duration object:
 * Then it will be True again, and so on through the pattern
 * After the last duration in the pattern, `yourobject()` will be False until you restart the whole sequence with `.start()`
 
-Note that this will return True if the interval has been passed: so you are not gauranteed to get exact timing. Consider the case where you have an `Every(0.1)`: if some code took 0.2 seconds, then you would get true at 0.2.
+Note that this will return True if the interval has been passed and you missed : so you are not guaranteed to get exact timing. Consider the case where you have an `Every(0.1)`: if some code took 0.2 seconds, then you would get true at 0.2.
 
 This will return true only once for each interval, so an `if...` will fire _at_ each interval, which is the point.
 
@@ -219,20 +219,28 @@ In the body of the `if`:
 
 The object knows which step of the pattern it is on, and you can use that instead of another variable to decide on the action.
 
-The first time `yourobject()` is true, `.i` will be 1.
+* Before you test `yourobject()`, `.i` will be the maximum index, i.e. length of the pattern - 1. E.g. for a simple `Every(0.1)`, `.i` would be 1. For a pattern like `Every(1,2,3)`, `.i` will be 2.
+* After the first time `yourobject()` is true (which is immediately), `.i` will be 0. 
+* So, `.i` is the index of the next interval
+
+For a non-repeating/duration object:
+
+* After the last time `yourobject()` is true, `.i` should be 0
 
     if yourobject():
-        if yourobject.i == 1: # not 0 first time!
-            print("first step of sequence")
-        elif yourobject.i == 2:
-            print("second step of sequence")
+        if yourobject.i == 0: # 0 first time, but 0 duration for periodics
+            print("start sequence")
+            # e.g. turn led for 1st interval
+        elif yourobject.i == 1:
+            print("after 1st duration of sequence")
+            # e.g. turn led off for 2nd interval
         ...
-
-Before the first true, `.i` should be 0. And, after the last interval in a non-repeating pattern, it should be 0.
 
 #### 5. `yourobject.last` # The last time it fired 
 
 Currently, you can look at the last time for the previous interval. The value is a `time.monotonic()`.
+
+Warning: this value is tweaked to adjust for drift, so isn't quite truthful! It's probably not a good idea to use this value.
 
 #### 6. `yourobject.interval = newvalue` # Update the interval/patterns 
 
@@ -240,7 +248,7 @@ or `yourobject.interval = (somesecs1, somesecs2, ...)`
 
 or `x = yourobject.interval`
 
-You can change the interval/pattern at any time, so you can dynamical change your timing (e.g. blink interval is proportional to the potentiometer). Note: setting the interval acts a lot like the constructor: a periodic object will fire immediately (call .start() if you want the first interval).
+You can change the interval/pattern at any time, so you can dynamical change your timing (e.g. blink interval is proportional to the potentiometer). Note: setting the interval acts a lot like the constructor: a periodic object will fire immediately (call .start() if you want the first interval), and a non-repeating/duration object with stop running (call `.start()` to start it).
 
 You can read the current interval. You will _always_ get a tuple back:
 
@@ -262,9 +270,9 @@ You can update to a single period, a pattern of repeating intervals, a one-shot,
 
 #### 7. `yourobject.start()` # Start/restart 
 
-Remember, a duration/non-repeating/timer object (has the trailing `0` in its pattern), starts out as non-running: it's false till you `.start` it and it's interval(s) expire.
+Remember, a duration/non-repeating/timer object (has the trailing `0` in its pattern), starts out as non-running: it's false till you `.start`.
 
-Typically useful to re-use a duration/non-repeating/timer after it has finished all of it's intervals.
+Typically useful to start a duration/non-repeating based on an event, or re-use a duration/non-repeating/timer after it has finished all of it's intervals.
 
 Also useful to synchronize the period/interval to a start time. `Every` objects for repeating periods have a start time that is set when they are constructed. Duration/non-repeating "start" when you call `.start()`. But, you could also synchronize a repeating pattern by setting the start (or updating it).
 

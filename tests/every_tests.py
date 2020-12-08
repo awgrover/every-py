@@ -115,6 +115,21 @@ class PeriodAndDurationTests(unittest.TestCase):
         # actually we measure 1st+2nd here:
         assert math.isclose(hit-start, 0.15, rel_tol=0.1, abs_tol=0.0), "1st elapsed ~0.15, actually %s" % (hit-start)
 
+    def testRunning(self):
+        start = time.monotonic()
+        tester = Every(0.05, 0)
+        assert tester.running == False,"Timers aren't running till .start()"
+
+        tester.start()
+        assert tester.running == True,"Timers are running after .start()"
+
+        hit = None
+        while not hit and time.monotonic()-start < 1:
+            if tester():
+                hit = time.monotonic()
+        assert hit
+        assert tester.running == False,"Timers aren't running after last interval"
+
     def testEveries(self):
         # because Every takes time, we are going to test a bunch of things in parallel
         # I had to tune math.isclose( ... rel_tol=x ) to match my systems performance. yuk

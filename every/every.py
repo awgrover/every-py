@@ -98,6 +98,8 @@ class Every(object):
             if next_interval != 0:
                 drift = diff % last_interval
                 self.last -= drift
+            else:
+                self.running = False
             return True
         else:
             return False
