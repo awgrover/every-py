@@ -55,7 +55,8 @@ class Every(object):
 
         self.running = True # modified by .interval=
         self.interval = interval
-        self.i = 0
+        # we pretend to start at last, for the immediate-expire case
+        self.i = len(self.interval)-1
         self.last = time.monotonic() - interval[self.i] # start immediatly
 
     @property

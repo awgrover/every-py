@@ -85,6 +85,36 @@ class PeriodAndDurationTests(unittest.TestCase):
         # I got 56,000 loops!
         assert ct > 1,"Ran a polling loop, i.e., didn't block for %s>1 times" % ct
 
+    def testFirstInterval(self):
+        # do we provide an interval == first interval in patterns?
+        # (cf. timers require .start(), and .start() causes "use first interval")
+
+        tester = Every(0.05, 0.1) # simple case
+
+        # on instant start, we'll get true immediately
+        assert tester(),"Instantly true"
+        assert tester.i==0,"After the first hit, we are at .i==0, saw %s" % tester.i
+
+        # the next interval should be the first one
+        start = time.monotonic()
+        hit = None
+        while not hit and time.monotonic()-start < 1:
+            if tester():
+                hit = time.monotonic()
+
+        assert hit,"Should have hit"
+        assert tester.i==1,"After the second hit, we are at .i==1, saw %s" % tester.i
+        assert math.isclose(hit-start, 0.05, rel_tol=0.1, abs_tol=0.0), "1st elapsed ~0.05, actually %s" % (hit-start)
+
+        # and double check that the 2nd is the second
+        hit = None
+        while not hit and time.monotonic()-start < 1:
+            if tester():
+                hit = time.monotonic()
+        assert tester.i==0,"After the third hit, we are at .i==0, saw %s" % tester.i
+        # actually we measure 1st+2nd here:
+        assert math.isclose(hit-start, 0.15, rel_tol=0.1, abs_tol=0.0), "1st elapsed ~0.15, actually %s" % (hit-start)
+
     def testEveries(self):
         # because Every takes time, we are going to test a bunch of things in parallel
         # I had to tune math.isclose( ... rel_tol=x ) to match my systems performance. yuk
