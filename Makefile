@@ -78,7 +78,7 @@ git-tag-up-to-date :
 .PHONY : test tests
 test tests : clean $(shell find tests -name '*_tests.py')
 	# python3 -m unittest tests.every_tests.PeriodAndDurationTests.testSetInterval
-	python3 -m unittest $^
+	python3 -m unittest $(shell find tests -name '*_tests.py')
 
 .PHONY : clean
 clean :

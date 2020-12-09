@@ -22,13 +22,14 @@ class Timer(object):
         # "interval" to be parallel with Every wording,
         # but actually a duration.
 
+        # lightweight! no @property
         self.interval = interval
         self.last = 0
         self.running = False # we aren't usable till .start()
 
-    def start():
+    def start(self):
         self.running = True
-        self.last = timer.monotonic()
+        self.last = time.monotonic()
 
     def __call__(self):
         if (self.running):
