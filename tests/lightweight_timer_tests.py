@@ -1,6 +1,5 @@
 import unittest
 import sys, os
-from every.lightweight_every import Every
 from every.lightweight_timer import Timer
 import time, math
 

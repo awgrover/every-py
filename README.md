@@ -382,9 +382,9 @@ The lightweight `Every` works much as above, except no patterns, and it _only_ d
 * The constructor `Every(...)` takes exactly 1 argument: the number of seconds.
 * You can't specify a pattern of intervals.
 * It always repeats (see `Timer`, next)
-* You can assign to `yourobject.interval` to update it, but only a single value.
+* You can assign to `yourobject.interval` to update it, but only a single value. You will surprised unless you also set `yourobject.last = time.monotonic()`.
 * You can read from `yourobject.interval`, but it is always a single value (not tuple).
-* You can use `yourobject.start()` to synchronize, and read `yourobject.last`
+* There is no `yourobject.start()` to synchronize, but you can read and set `yourobject.last`. Setting `.last = time.monotonic()` lets you "synchronize".
 * There is no `yourobject.i` (there are no patterns)
 
 ### Lightweight `Timer`
