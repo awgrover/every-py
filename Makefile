@@ -67,7 +67,7 @@ git-tag-up-to-date :
 			echo "No git-tag matching version.py: v$(version). # git tag v$(version) (use env FORCE=1 to override)"; \
 			exit 1; \
 		fi; \
-		if test `set -x; git show-ref -s --tags v$(version)` != `git show-ref --head --heads -s HEAD`; then \
+		if test `set -x; git rev-list -n 1 v$(version)` != `git show-ref --head --heads -s HEAD`; then \
 			echo "HEAD != tag v$(version). update version.py (use env FORCE=1 to override)"; \
 			exit 1; \
 		fi; \
