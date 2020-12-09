@@ -4,7 +4,7 @@
 # depend on git-controlled files, and their directory to detect dropping a file
 heavy_mpy = $(shell git ls-files every | egrep '\.py$$' | egrep -v 'lightweight' | sed 's/\.py$$/.mpy/') 
 heavy_dirs = $(shell echo $(heavy_mpy) | xargs dirname | sort -u)
-lightweight_mpy = $(shell git ls-files every/lightweight* | egrep '\.py$$' | sed 's/\.py$$/.mpy/') 
+lightweight_mpy = $(shell git ls-files every/lightweight* every/__init__.py | egrep '\.py$$' | sed 's/\.py$$/.mpy/') 
 heavy_dirs = $(shell echo $(lightweight_mpy) | xargs dirname | sort -u)
 
 version = $(shell python3 -c 'import every.version; print( every.version.__version__)')
@@ -28,7 +28,7 @@ every-mpy-$(version).zip : $(heavy_mpy) $(heavy_dirs) | git-tag-up-to-date
 	rm $@ 2>/dev/null || true
 	zip $@ $(heavy_mpy)
 
-every-mpy-lightweight-$(version).zip : $(lightweight_mpy) $(heavy_dirs) | git-tag-up-to-date clean
+every-mpy-lightweight-$(version).zip : $(lightweight_mpy) $(heavy_dirs) | git-tag-up-to-date
 	rm $@ 2>/dev/null || true
 	zip $@ $(lightweight_mpy)
 
@@ -83,7 +83,7 @@ test tests : clean $(shell find tests -name '*_tests.py')
 .PHONY : clean
 clean :
 	find . -name __pycache__ | xargs --no-run-if-empty echo rm -rf 
-	find . -name '*.mpy' | xargs --no-run-if-empty echo rm
+	find . -name '*.mpy' | xargs --no-run-if-empty rm
 	
 # just for convenience, we don't commit README.html
 .PHONY : doc docs

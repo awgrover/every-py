@@ -2,6 +2,8 @@
 
 Including patterns for periodic, and non-repeating (timer), actions.
 
+[https://github.com/awgrover/every-py](https://github.com/awgrover/every-py)
+
 While written especially for micropython and circuitpython, this library works in normal python 3. The examples are for the Adafruit CircuitPlayground Express variants, because that's what we've been working with.
 
 ## Summary
@@ -94,7 +96,9 @@ For circuit/micro-python devices:
 * copy the `every` folder to your `CIRCUITPYTHON`
 * write code that uses it
 
-For the smaller-memory-footprint version, the instructions are the same except use the `every-mpy-lightweight-*.zip`
+For the smaller-memory-footprint version:
+
+* the instructions are the same except use the `every-mpy-lightweight-*.zip`
 
 For regular python:
 
