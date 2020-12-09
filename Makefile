@@ -11,11 +11,11 @@ version = $(shell python3 -c 'import every.version; print( every.version.__versi
 release : every-mpy-$(version).zip every-mpy-lightweight-$(version).zip
 	@# extra release artefacts, the mpy .zip files
 
-every-mpy-$(version).zip : $(all_mpy) $(all_dirs) | git-tag-up-to-date
+every-mpy-$(version).zip : $(all_mpy) $(all_dirs) | git-tag-up-to-date clean
 	rm $@ 2>/dev/null || true
 	zip $@ $(all_mpy)
 
-every-mpy-lightweight-$(version).zip : $(all_lightweight_mpy) $(all_dirs) | git-tag-up-to-date
+every-mpy-lightweight-$(version).zip : $(all_lightweight_mpy) $(all_dirs) | git-tag-up-to-date clean
 	rm $@ 2>/dev/null || true
 	zip $@ $(all_lightweight_mpy)
 
@@ -60,9 +60,14 @@ git-tag-up-to-date :
 
 # just for convenience
 .PHONY : test tests
-test tests : $(shell find tests -name '*.py' | egrep '__')
+test tests : clean $(shell find tests -name '*_tests.py')
 	# python3 -m unittest tests.every_tests.PeriodAndDurationTests.testSetInterval
-	python3 -m unittest tests.every_tests
+	python3 -m unittest $^
+
+.PHONY : clean
+clean :
+	find . -name __pycache__ | xargs --no-run-if-empty echo rm -rf 
+	find . -name '*.mpy' | xargs --no-run-if-empty echo rm
 	
 # just for convenience, we don't commit README.html
 .PHONY : doc docs

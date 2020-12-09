@@ -1,13 +1,10 @@
 import unittest
 import sys, os
-from every.every import Every
+from every.lightweight_every import Every
+from every.lightweight import Timer
 import time, math
 
-class PeriodAndDurationTests(unittest.TestCase):
-    def setUp(self):
-        # we are going to be tricky, and make it here, so it's start is now
-        # when we test it, other tests may have run, using up its time!
-        self.start_tester = Every(0.05)
+class LightweightTimerTests(unittest.TestCase):
 
     def test0Sanity_monotonic(self):
         # make sure our assumptions hold
@@ -20,13 +17,16 @@ class PeriodAndDurationTests(unittest.TestCase):
         assert now != finished, "Time actually passes according to monotonic()"
         assert finished - now < 0.005, "But, we can get a lot of work done in 0.05 (actual %s)" % (finished-now)
 
-    def testSimpleTimer(self):
-        # does a basic behavior work
-
-        tenth = Every(0.05, 0)
+    def testInitialState(self):
+        tester = Timer(0.05)
         start=time.monotonic()
 
-        assert not tenth(), "Does not fire instantly"
+        assert not tester(), "Does not fire instantly"
+
+'''    
+    # can set interval
+    # has .start()
+
         assert math.isclose(time.monotonic()-start, 0, rel_tol=0.01, abs_tol=0.001),"First test doesn't block or take time, saw %s != %s " % (time.monotonic()-start)
 
         start=time.monotonic()
@@ -251,7 +251,7 @@ class PeriodAndDurationTests(unittest.TestCase):
         self.do_intervals_match( 'unchanged', hit_at['unchanged'], [ 0.0, 0.05, 0.1, 0.15, 0.2 ] )
         print( "ci", changed.interval)
         self.do_intervals_match( 'changed', hit_at['changed'], [ 0.0, 0.1, 0.2] )
-        
+'''        
 
 if __name__ == "__main__":
     unittest.main() # run all tests
