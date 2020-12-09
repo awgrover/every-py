@@ -2,6 +2,8 @@
 
 Including patterns for periodic, and non-repeating (timer), actions.
 
+[https://github.com/awgrover/every-py](https://github.com/awgrover/every-py)
+
 While written especially for micropython and circuitpython, this library works in normal python 3. The examples are for the Adafruit CircuitPlayground Express variants, because that's what we've been working with.
 
 ## Summary
@@ -23,7 +25,7 @@ While written especially for micropython and circuitpython, this library works i
 
 ## Background
 
-`time.sleep()` stops your code, so you can only do 1 thing at a time. Here's the typical blink:
+`time.sleep()` stops your code, so you can only do 1 thing at a time. Here's the familiar blocking-style blink:
 
     import sleep from time
 
@@ -41,7 +43,7 @@ The entire body of the `while` is affected by the `sleep()`. So, you can't blink
 
     while(1):
 
-        # this loop doesn't work 
+        # this loop doesn't do what you hope 
         # because it stops completely at each sleep()
 
         # blink builtin neopixel "0"
@@ -62,9 +64,9 @@ Similarly, if you wanted to read a sensor, update a servo, read another sensor, 
 
 To do several things periodically, you want a non-blocking solution.
 
-It's common to pair a periodic action with a duration (timer), like "every minute, make an obnoxious beep noise". The beep-noise has a duration. You'll want a non-blocking duration (timer) for that. Patterns of intervals and non-repeating patterns of intervals are also useful.
+It's common to pair a periodic action with a duration (timer), like "every minute, make an obnoxious beep noise". The beep-noise has a duration. You'll want a non-blocking duration (timer) for that, too. Patterns of intervals and non-repeating patterns of intervals are also useful.
 
-This is the classic, explicit, solution, that doesn't block your code:
+This is the classic solution, that doesn't block your code:
 
     interval = 0.5 # some seconds
     last_time = time.monotonic()
@@ -74,13 +76,13 @@ This is the classic, explicit, solution, that doesn't block your code:
             last_time = time.monotonic()
             ...do something...
 
-I've turned that into a pattern via a class.
+I've turned that into a pattern via a class, with more flexibility.
 
 (this is based on a c++ version I've written for Arduino)
 
 ## Prerequisites
 
-This was written for python 3, and the standard libraries. It is specifically targetted to Adafruit's [circuitpython](https://circuitpython.org/) (a derivative of micropython).
+This was written for python 3, and the standard libraries. It is specifically targetted to Adafruit's [circuitpython](https://circuitpython.org/) (a derivative of micropython). It does not have any extra prerequisites.
 
 ## Installation
 
@@ -94,6 +96,10 @@ For circuit/micro-python devices:
 * copy the `every` folder to your `CIRCUITPYTHON`
 * write code that uses it
 
+For the smaller-memory-footprint version:
+
+* the instructions are the same except use the `every-mpy-lightweight-*.zip`
+
 For regular python:
 
 * go to [Latest release](https://github.com/awgrover/every-py/releases/latest)
@@ -104,6 +110,8 @@ For regular python:
 * or otherwise put the unzipped directory in the python search path
 
 ## Usage
+
+(see also, "Lightweight Usage" below)
 
 ### 1. Import
 
@@ -178,15 +186,24 @@ This uses a function-call pattern to test if the interval has expired. For all t
         if beeping():
             ...it's time, do something...
 
-The result of `yourobject()` is false until the interval, then true exactly once to signal that the interval has passed, and then becomes false again. For objects with multiple intervals (a pattern), it will become true again for the next interval in the pattern. For repeating objects (where the constructor had _no_ final `0`), it will start the pattern overagain. For non-repeating (_with_ a final `0` in the pattern), it will stay false after the last interval (not counting the final 0), see `.start`.
+For repeating/periodic objects:
 
-**Non-repeating** objects will not return true till you `.start` them (see below).
+* The first test of `yourobject()` will be True. I.e. instantly.
+* It will then be false till the first interval has passed
+* Then it will be True again, and so on through the pattern
+* At the end of the pattern, it will repeat
 
-Note that this will return true if the interval has been passed: so you are not gauranteed to get exact timing. Consider the case where you have an `Every(0.1)`: if some code took 0.05 seconds, then you would get true at 0.15.
+For a non-repeating/duration object:
 
-This will return true only once for the interval, so if you were somehow delayed 1 second for an `Every(0.1)`, you'd still only get true once at 1 second (and then every 0.1 as usual).
+* `yourobject()` will be False
+* When you call `yourobject.start()`, the first duration begins
+* `yourobject()` will be False till the duration has passed
+* Then it will be True again, and so on through the pattern
+* After the last duration in the pattern, `yourobject()` will be False until you restart the whole sequence with `.start()`
 
-Especially relevant for timer/one-shot objects, the interval starts from when you construct the object. See below for resetting the start time.
+Note that this will return True if the interval has been passed and you missed : so you are not guaranteed to get exact timing. Consider the case where you have an `Every(0.1)`: if some code took 0.2 seconds, then you would get true at 0.2.
+
+This will return true only once for each interval, so an `if...` will fire _at_ each interval, which is the point.
 
 A typical pattern would be:
 
@@ -198,7 +215,7 @@ In the body of the `if`:
 
 * long operations will still stop the whole program (e.g. fetching a web-page)
 * `sleep()` will still stop the whole program
-* long'ish operations may make other Every objects late, or cause one to skip
+* long'ish operations may make other Every objects late
 
 **Drift** The code makes a decent attempt to avoid drift. So, in the cases above, where it can't "fire" exactly on 0.1 intervals, it will still try to fire on the next multiple of the 0.1 interval.
 
@@ -206,20 +223,28 @@ In the body of the `if`:
 
 The object knows which step of the pattern it is on, and you can use that instead of another variable to decide on the action.
 
-The first time `yourobject()` is true, `.i` will be 1.
+* Before you test `yourobject()`, `.i` will be the maximum index, i.e. length of the pattern - 1. E.g. for a simple `Every(0.1)`, `.i` would be 1. For a pattern like `Every(1,2,3)`, `.i` will be 2.
+* After the first time `yourobject()` is true (which is immediately), `.i` will be 0. 
+* So, `.i` is the index of the next interval
+
+For a non-repeating/duration object:
+
+* After the last time `yourobject()` is true, `.i` should be 0
 
     if yourobject():
-        if yourobject.i == 1: # not 0 first time!
-            print("first step of sequence")
-        elif yourobject.i == 2:
-            print("second step of sequence")
+        if yourobject.i == 0: # 0 first time, but 0 duration for periodics
+            print("start sequence")
+            # e.g. turn led for 1st interval
+        elif yourobject.i == 1:
+            print("after 1st duration of sequence")
+            # e.g. turn led off for 2nd interval
         ...
-
-Before the first true, `.i` should be 0. And, after the last interval in a non-repeating pattern, it should be 0.
 
 #### 5. `yourobject.last` # The last time it fired 
 
 Currently, you can look at the last time for the previous interval. The value is a `time.monotonic()`.
+
+Warning: this value is tweaked to adjust for drift, so isn't quite truthful! It's probably not a good idea to use this value.
 
 #### 6. `yourobject.interval = newvalue` # Update the interval/patterns 
 
@@ -227,7 +252,7 @@ or `yourobject.interval = (somesecs1, somesecs2, ...)`
 
 or `x = yourobject.interval`
 
-You can change the interval/pattern at any time, so you can dynamical change your timing (e.g. blink interval is proportional to the potentiometer). Note: setting the interval acts a lot like the constructor: a periodic object will fire immediately (call .start() if you want the first interval).
+You can change the interval/pattern at any time, so you can dynamical change your timing (e.g. blink interval is proportional to the potentiometer). Note: setting the interval acts a lot like the constructor: a periodic object will fire immediately (call .start() if you want the first interval), and a non-repeating/duration object with stop running (call `.start()` to start it).
 
 You can read the current interval. You will _always_ get a tuple back:
 
@@ -249,9 +274,9 @@ You can update to a single period, a pattern of repeating intervals, a one-shot,
 
 #### 7. `yourobject.start()` # Start/restart 
 
-Remember, a duration/non-repeating/timer object (has the trailing `0` in its pattern), starts out as non-running: it's false till you `.start` it and it's interval(s) expire.
+Remember, a duration/non-repeating/timer object (has the trailing `0` in its pattern), starts out as non-running: it's false till you `.start`.
 
-Typically useful to re-use a duration/non-repeating/timer after it has finished all of it's intervals.
+Typically useful to start a duration/non-repeating based on an event, or re-use a duration/non-repeating/timer after it has finished all of it's intervals.
 
 Also useful to synchronize the period/interval to a start time. `Every` objects for repeating periods have a start time that is set when they are constructed. Duration/non-repeating "start" when you call `.start()`. But, you could also synchronize a repeating pattern by setting the start (or updating it).
 
@@ -329,6 +354,59 @@ This example uses the built-in LED, and neo-pixels:
 
         # `if beeping()...` would have a similar pattern
 
+## Lightweight Usage
+
+It is not difficult to consume all available memory on a circuitplayground express, or other circuit/micro-python device. Supposedly, around 200 lines of python will do it on the circuitplayground express!
+
+Using the .mpy files can help, as this avoids byte-code compilation on the device. See Installation above.
+
+But, I've provided simplified versions of `Every`, for repeating periods; and a separate `Timer` class for one-shot durations. They don't support patterns, and are separate classes. They are significantly smaller ("significant" if you are at the point where you are worrying about it), and somewhat faster. Again, use the .mpy files, specifically see the `Releases` (as noted in "Installation" above) that have only the lightweight versions.
+
+* If you only import one class from `every.lightweight`, it uses much less memory.
+* If you import both `Every` and `Timer`, it doesn't save as much memory (especially byte-code), though each object you make is smaller than the full-function `Every`, and is somewhat faster. You should consider just using the full-function `Every`.
+* I don't think special versions that can do patterns would end up being smaller enough to make it worthwhile. If you want patterns of intervals, just use the full-function `Every`
+
+### Lightweight `Every`
+
+The lightweight `Every` works much as above, except no patterns, and it _only_ does repeating periodic (see `Timer` below):
+
+    from every.lightweight import Every
+
+    # globals
+    every_second = Every(1.0)
+
+    while(1):
+        if every_second():
+            ....
+
+* The constructor `Every(...)` takes exactly 1 argument: the number of seconds.
+* You can't specify a pattern of intervals.
+* It always repeats (see `Timer`, next)
+* You can assign to `yourobject.interval` to update it, but only a single value. You will surprised unless you also set `yourobject.last = time.monotonic()`.
+* You can read from `yourobject.interval`, but it is always a single value (not tuple).
+* There is no `yourobject.start()` to synchronize, but you can read and set `yourobject.last`. Setting `.last = time.monotonic()` lets you "synchronize".
+* There is no `yourobject.i` (there are no patterns)
+
+### Lightweight `Timer`
+
+The separate lightweight `Timer` works much as the regular `Every` for non-repeating/timer, except no patterns.
+
+    from every.lightweight import Timer
+
+    # globals
+    has_been_one_second = Timer(1.0)
+
+    while(1):
+        if somethinginterestinghappens:
+            ... start something ...
+            has_been_one_second.start()
+
+        if has_been_one_second():
+            ....
+
+* All the notes for lightweight `Every` apply
+* It does have `yourobject.running`
+
 ## References
 
 This is not the only solution, of course. 
@@ -340,17 +418,18 @@ Advantages:
 * reads well if you name the Every instance well
 * conscious of code/variable footprint relevant for circuit/micro-python RAM limits
 * works without the `threading` module
+* lightweight options available
 
 Disadvantages:
 
 * not efficient for a large number of `Every` objects (perhaps 10 is the breakpoint)
-* not minimal for _only_ the basic periodic action (but see the lightweight version soon to be released)
+* not minimal for _only_ the basic periodic action (but see the lightweight versions)
 * the `if someperiod():...` pattern is a less common pattern in the python world
 * a bit awkward for getting the index of the pattern
 * does not support lambdas (nor function references), because the `if ...` pattern seemed good enough, and kept the memory size down
 * unlike c++, you pay for features/behavior that you don't use (thus the lightweight versions)
 * to do "repeat N times", you have to provide N intervals in the constructor, or do your own counter+reset
-* doesn't use the `threading` module, nor async mechanisms
+* doesn't use the `threading` module, nor the (new) `async` mechanism
 
 **other libs**
 
@@ -359,8 +438,30 @@ Disadvantages:
 * http://docs.python.org/2.7/library/threading.html#module-threading
 * http://bleaklow.com/2010/07/20/a\_very\_simple\_arduino\_task\_manager.html
 
+## Development/Building
+
+No building is required for the .py files. But, the .mpy files have to be "compiled" by `cross-mpy`. And, the release artefacts (mpy zip files) have to be built.
+
+### Building Prerequisites
+
+* git
+* get, install as mpy-cross, and add to PATH: `mpy-cross` command from [https://pypi.org/project/mpy-cross](https://pypi.org/project/mpy-cross)
+* The Makefile requires `gnu-make`
+
+### Building
+
+* update `every/version.py`, incrementing the `__version__` as appropriate
+* commit changed files
+* create a git tag if the `__version__` has changed
+* run
+
+    make
+
+* It will check that the git-tag and version.py match, and will make the .zip files
+* push and create a "Release" in gihub based on the tag, attach the new .zip files that were made
+
 ## TODO
 
-* a lightweight version that takes less code-space/variable-space memory.
-* the `.mpy` compiled versions
 * cleanup docstrings to be python'ish
+* add tests
+* "publish" to pip-like and adafruit community
