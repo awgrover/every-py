@@ -438,6 +438,16 @@ Disadvantages:
 * http://docs.python.org/2.7/library/threading.html#module-threading
 * http://bleaklow.com/2010/07/20/a\_very\_simple\_arduino\_task\_manager.html
 
+## Contributing
+
+When reporting a bug, describe enough so that I can reproduce it (include code if possible). Obviously, if it involves some specific hardware, it may be hard to debug.
+
+Please report bugs, issues, suggestions, improvements via the **Issues** in [https://github.com/awgrover/every-py](https://github.com/awgrover/every-py).
+
+If you use this, I'd be interested in feedback about how well it works for you.
+
+If you want to make a change, you could try to ask first in an "issue" (I may not respond quickly), or just make a pull-request which might lead to a discussion.
+
 ## Development/Building
 
 No building is required for the .py files. But, the .mpy files have to be "compiled" by `cross-mpy`. And, the release artefacts (mpy zip files) have to be built.
@@ -446,7 +456,7 @@ No building is required for the .py files. But, the .mpy files have to be "compi
 
 * git
 * get, install as mpy-cross, and add to PATH: `mpy-cross` command from [https://pypi.org/project/mpy-cross](https://pypi.org/project/mpy-cross)
-* The Makefile requires `gnu-make`
+* gnu-make
 
 ### Building
 
@@ -463,5 +473,4 @@ No building is required for the .py files. But, the .mpy files have to be "compi
 ## TODO
 
 * cleanup docstrings to be python'ish
-* add tests
 * "publish" to pip-like and adafruit community
