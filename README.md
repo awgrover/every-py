@@ -318,8 +318,8 @@ This example uses the built-in LED, and neo-pixels:
     blink_interval = Every(0.5)
     long_short_blink = Every(0.5, 0.1)
     fancy_blink_interval = Every(0.5, 0.1, 0.1, 0.1)
-    sound_duration = Every(2, 0)
-    beeping = Every(1, 0.5, 1, 0.5, 0)
+    # the first interval is a delay at start, then on/off/on/off
+    sound_duration = Every(0.1, 2, 2, 0.3, 0)
 
     def blink_neo(index):
         '''simple blink: switch state on every call'''
@@ -328,6 +328,7 @@ This example uses the built-in LED, and neo-pixels:
         else:
             cp.pixels[index] = (0,0,0) # off
         
+    sound_duration.start()
 
     while(1): # typical "loop" for "keep doing stuff" in circuit/micro python
         
@@ -347,14 +348,12 @@ This example uses the built-in LED, and neo-pixels:
 
         if sound_duration():
             # the even/odd trick:
-            if sound_duration.i % 2
+            if sound_duration.i % 2:
                 # not playing:
                 cp.start_tone(262)
             else:
                 # playing, so:
                 cp.stop_tone()
-
-        # `if beeping()...` would have a similar pattern
 
 ## Lightweight Usage
 

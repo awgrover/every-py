@@ -13,7 +13,7 @@ version = $(shell python3 -c 'import every.version; print( every.version.__versi
 mpy_cross_command = $(or $(shell which mpy-cross), mpy-cross)
 
 .PHONY : release
-release : every-mpy-$(version).zip every-mpy-lightweight-$(version).zip
+release : every-mpy-$(version).zip every-mpy-lightweight-$(version).zip examples-$(version).zip
 	@# extra release artefacts, the mpy .zip files
 
 # what version will we make?
@@ -32,6 +32,8 @@ every-mpy-lightweight-$(version).zip : $(lightweight_mpy) $(heavy_dirs) | git-ta
 	rm $@ 2>/dev/null || true
 	zip $@ $(lightweight_mpy)
 
+examples-$(version).zip : examples $(shell find examples -type d) $(shell find examples -name '*.py')
+	zip $@ $(shell find examples -name '*.py')
 # You can use this if you've made a minor revision (readme, or bug fix):
 # commit all changes, then: make minor-release
 # It will update the git-tag and do the default make, which is the mpy.zips
