@@ -22,13 +22,13 @@ while(1):
         cp.pixels[1] = (0,0,0) if cp.pixels[1] == blink_white else blink_white
         cp.pixels[8] = (0,0,0) if cp.pixels[8] == blink_white else blink_white
 
-    # Touch near the usb port triggers
+    # Touch near the usb port starts a duration
     if cp.touch_A3 or cp.touch_A2 or cp.touch_A5 or cp.touch_A4:
         sound_duration.start()
         cp.start_tone(tone)
         cp.red_led = True
 
-    if sound_duration():
+    if sound_duration(): # expired
         #tone off
         cp.stop_tone()
         cp.red_led = False
