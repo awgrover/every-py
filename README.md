@@ -93,7 +93,7 @@ For circuit/micro-python devices:
 * go to [Latest release](https://github.com/awgrover/every-py/releases/latest)
 * download the `every-mpy-*.zip` (or the "Source code" zip for regular .py files)
 * unzip it to somewhere that you can remember
-* copy the `every` folder to your `CIRCUITPYTHON`
+* copy the `every` folder to your `CIRCUITPYTHON/lib`
 * write code that uses it
 
 For the smaller-memory-footprint version:
