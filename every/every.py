@@ -105,4 +105,7 @@ class Every(object):
             return False
 
 class Timer(Every):
-    pass
+    # convenience for Every(a,b,0), i.e. one-shot
+    def __init__(self, *interval):
+        # add the ,0
+        super().__init__( *( tuple(list(interval) + [0]) ))

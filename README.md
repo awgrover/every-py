@@ -152,21 +152,25 @@ This creates an object that has a sequence of intervals, then it repeats the seq
 The first one, `long_short_blink` can be used to have a long on period (0.5 seconds), and a short off period (0.1 seconds).
 And, `fancy_blink_interval` will fire at 0.5 seconds, then 0.1, then 0.1, then 0.1, and then start over.
 
-#### Every(seconds, 0) # a duration/timer, non-repeating
+#### Timer(seconds) # a duration/timer, non-repeating
 This creates an object that will fire only **once**, after `seconds`. So, it is used as a timer. Note the **0**, that is the signal that this is a timer (one-shot). You have to call `.start()` to start this. It is resettable.
 
+Timer(seconds) is exactly the same as Every(seconds, 0).
+
     from every.every import Every
 
     # globals
-    sound_duration = Every(2, 0)
+    sound_duration = Timer(2)
 
-#### Every(seconds1, seconds2, ..., 0) # a one-shot sequence of intervals
+#### Timer(seconds1, seconds2, ...) # a one-shot sequence of intervals
 This creates an object that will fire for each interval, but does not repeat: "do this sequence once". So, still like a timer, but with a pattern before it stops firing. It is resettable.
 
+Timer(seconds1, seconds2, ...) is exactly the same as Every(seconds1, seconds2, ..., 0).
+
     from every.every import Every
 
     # globals
-    beeping = Every(1, 0.5, 1, 0.5, 0)
+    beeping = Timer(1, 0.5, 1, 0.5)
 
 Again, **name** the object so that it reads well with the `if ...` pattern you'll use below: "if in-some-duration():..."
 
