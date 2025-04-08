@@ -3,14 +3,18 @@
 #
 # Periodic actions, and "one-shot" timers
 # and patterns of those.
+# See also: lighter-weight with less functionality in every.lightweight_every and every.lightweight_timer
 
-from unrvl.every import Every
+from every import Every,Timer
 
 # setup periodics, patterns, timers
 every_half_second = Every(0.5) # every 0.5 seconds
 pattern1 = Every(1,0.1) # 1 second, then 0.1 second. pattern
-in_two_seconds = Every(2, 0) # does not repeat, note the 0
-tap_sequence = Every(1.0, 0.1, 1, 0.1, 0) # does not repeat, a pattern
+
+in_two_seconds =  Timer(2) # does not repeat
+# same as: in_two_seconds = Every(2, 0) # note the trailing 0
+tap_sequence =  Timer(1.0, 0.1, 1, 0.1) # does not repeat, a pattern
+# same as: tap_sequence = Every(1.0, 0.1, 1, 0.1, 0)  # note the trailing 0
 
 # other setup
 cp.detect_taps = 1
